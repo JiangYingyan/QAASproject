@@ -1,0 +1,52 @@
+滑窗   设备23 8通道NE干电极
+左手指实际动 右休息
+40train 40online
+[ INF ] At time 0.000 sec <Box algorithm::(0x5f46e728, 0x65c0dbad) aka Graz Motor Imagery BCI Stimulator> Lua script terminated
+[ INF ] At time 0.070 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> Data chunk size:[8, 32]
+[ INF ] At time 28.070 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:100 right:0
+[ INF ] At time 38.070 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:98 right:1
+[ INF ] At time 48.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:89 right:8
+[ INF ] At time 58.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:82 right:18
+[ INF ] At time 68.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:72 right:28
+[ INF ] At time 78.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:99 right:0
+[ INF ] At time 88.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:99 right:1
+[ INF ] At time 98.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:85 right:17
+[ INF ] At time 108.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:65 right:35
+[ INF ] At time 118.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:75 right:27
+[ INF ] At time 128.133 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:67 right:35
+[ INF ] At time 138.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:102 right:0
+[ INF ] At time 148.070 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:98 right:2
+[ INF ] At time 158.070 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:99 right:0
+[ INF ] At time 168.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:77 right:23
+[ INF ] At time 178.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:39 right:61
+[ INF ] At time 188.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:96 right:4
+[ INF ] At time 198.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:65 right:37
+[ INF ] At time 208.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:101 right:1
+[ INF ] At time 218.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:86 right:14
+[ INF ] At time 228.070 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:98 right:2
+[ INF ] At time 238.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:98 right:4
+[ INF ] At time 248.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:98 right:2
+[ INF ] At time 258.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:99 right:1
+[ INF ] At time 268.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:76 right:23
+[ INF ] At time 278.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:63 right:37
+[ INF ] At time 288.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:94 right:6
+[ INF ] At time 298.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:100 right:0
+[ INF ] At time 308.070 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:97 right:3
+[ INF ] At time 318.070 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:77 right:22
+[ INF ] At time 328.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:85 right:15
+[ INF ] At time 338.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:100 right:0
+[ INF ] At time 348.070 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:98 right:1
+[ INF ] At time 358.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:95 right:5
+[ INF ] At time 368.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:97 right:3
+[ INF ] At time 378.102 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:98 right:2
+[ INF ] At time 388.164 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:79 right:23
+[ INF ] At time 398.117 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:71 right:29
+[ INF ] At time 408.055 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:70 right:29
+[ INF ] At time 418.102 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> left:95 right:5
+[ INF ] At time 434.781 sec <Box algorithm::(0x000036e6, 0x00003780) aka Python scripting> Uninitializing Python Box
+tiral
+[1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0]
+predict
+[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+correct rate:
+0.5
