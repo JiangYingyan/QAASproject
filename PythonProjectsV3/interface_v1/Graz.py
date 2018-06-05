@@ -16,11 +16,11 @@ StimEvent, EVT_STIM = wx.lib.newevent.NewEvent()  # 自定义事件
 class Graz(wx.Frame):
     #  刺激界面
     def __init__(self, parent=None, customFirstCuePath = '', customSecondCuePath = '', auditoryCue = False):
-        super(Graz, self).__init__(parent, title="Graz", size=(1280, 640))
+        super(Graz, self).__init__(parent, title="Graz", size=(1280, 720))
         self.SetWindowStyle(wx.DEFAULT_FRAME_STYLE & ~(
             wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
         self.SetBackgroundColour(wx.BLACK)
-        #self.Centre()
+        self.Centre()
         self.Bind(EVT_STIM, self.onStim)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.setStimulator()
@@ -32,7 +32,7 @@ class Graz(wx.Frame):
         self.gifCtrl = wxadv.AnimationCtrl(self)
         self.threadStim = None
         print("parent:", self.Parent)
-        print(self.Parent.grazFinish)
+        # print(self.Parent.grazFinish)
         rightArrow = [wx.Point(i) for i in
                      [(20, 50), (-80, 50), (-80, -50), (20, -50),
                       (20, -100), (120, 0), (20, 100)]]
@@ -69,20 +69,8 @@ class Graz(wx.Frame):
         if auditoryCue:
             LeftSound = ''
             RightSound = ''
-            self.onStimActions['OVTK_GDF_Left'] = (self.playSound, LeftSound)
-            self.onStimActions['OVTK_GDF_Left'] = (self.playSound, RightSound)
-
-    def setFirstCue(self, path = None):
-        if path:
-            self.onStimActions['OVTK_GDF_Left'] = (self.displayCue, path)
-        else:
-            self.onStimActions['OVTK_GDF_Left'] = (self.drawArrow, 'left')
-
-    def setSecondCue(self, path = None):
-        if path:
-            self.onStimActions['OVTK_GDF_Right'] = (self.displayCue, path)
-        else:
-            self.onStimActions['OVTK_GDF_Right'] = (self.drawArrow, 'right')
+            self.onStimActions['OVTK_GDF_Left'] = (self.displaySound, LeftSound)
+            self.onStimActions['OVTK_GDF_Left'] = (self.displaySound, RightSound)
 
     def clear(self):
         self.dc.Clear()
@@ -111,19 +99,20 @@ class Graz(wx.Frame):
         self.clear()
         self.dc.SetTextForeground(wx.WHITE)
         self.dc.SetFont(wx.Font(wx.FontInfo(48).Bold().FaceName('SimHei')))
-        self.dc.DrawText(string, self.centerPoint-self.dc.GetTextExtent(string)/2)
+        self.dc.DrawText(string, self.centerPoint - self.dc.GetTextExtent(string) / 2)
 
     def displayCue(self, path=''):
-        # img = wx.Bitmap(path, wx.BITMAP_TYPE_BMP)
+        # img = wx.BitmapFromImage(wx.Image(path, wx.BITMAP_TYPE_ANY))
+        # self.dc.DrawBitmap(img, self.centerPoint - img.GetSize()/2)
         img = wx.Image(path)
-        print(img.GetType()==wx.BITMAP_TYPE_GIF)
+        print(img.GetType() == wx.BITMAP_TYPE_GIF)
         if img.GetType() == wx.BITMAP_TYPE_GIF:
             self.displayGif(path)
         else:
             img = img.ConvertToBitmap()
-            self.dc.DrawBitmap(img, self.centerPoint - img.GetSize()/2)
+            self.dc.DrawBitmap(img, self.centerPoint - img.GetSize() / 2)
 
-    def playSound(self, path=''):
+    def displaySound(self, path=''):
         sound = wx.adv.Sound(path)
         sound.Play()
 
@@ -195,11 +184,11 @@ class Stimulator:
         self.tagging = False
         self.sche = sched.scheduler()
 
-    def addStim(self, stim, interval=0, during=0, priority =10):
+    def addStim(self, stim, interval=0, during=0, priority=10):
         self.sequence.append((self.T, stim, interval, during, priority))
         self.T += interval
 
-    def insertStim(self, stim, t=0, during=0, priority = 10):
+    def insertStim(self, stim, t=0, during=0, priority=10):
         self.sequence.append((self.T, stim, interval, during, priority))
         self.T = t
 

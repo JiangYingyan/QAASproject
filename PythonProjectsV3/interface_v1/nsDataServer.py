@@ -1,6 +1,7 @@
 import socket
 import struct
 import time
+
 import numpy as np
 from pylsl import StreamInlet, resolve_stream
 
@@ -65,9 +66,9 @@ class nsDataServer(DataServer):
             data_head = self.NSocket.recv(12)
             if (len(data_head) != 0):
                 break
-        chId = str(data_head[0:4], encoding='utf-8')
-        Code = int.from_bytes(data_head[4:6], byteorder='big')
-        Request = int.from_bytes(data_head[6:8], byteorder='big')
+        # chId = str(data_head[0:4], encoding='utf-8')
+        # Code = int.from_bytes(data_head[4:6], byteorder='big')
+        # Request = int.from_bytes(data_head[6:8], byteorder='big')
         size = int.from_bytes(data_head[8:12], byteorder='big')
         total = 0
         Data = bytearray()
@@ -107,5 +108,5 @@ class nsDataServer(DataServer):
         self.mark = np.array(self.markList)
         self.signal = np.array(self.signalList)
         np.savez(time.strftime(path + "\\acquireNSsignal_%Y_%m_%d_%H_%M_%S"),
-                 signal=self.signal, mark=self.mark, timestamp=self.timestamp, firstsignal=self.TimeOfsignal)
+                 signal=self.signal, mark=self.mark, timestamp=self.timestamp, firstsignal = self.TimeOfsignal)
 
