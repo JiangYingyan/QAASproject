@@ -12,7 +12,7 @@ import serial
 
 
 
-class neDataServer(DataServer):
+class OnlineneDataServer(DataServer):
     def __init__(self, parent):
         super(neDataServer, self).__init__(parent)
         self.ip = 'localhost'

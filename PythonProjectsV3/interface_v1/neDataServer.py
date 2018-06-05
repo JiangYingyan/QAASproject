@@ -43,7 +43,7 @@ class neDataServer(DataServer):
                 Data = Data + a
                 total = total + len(a)
             data = [i[0]
-                    for i in struct.iter_unpack('<i', Data)]
+                    for i in struct.iter_unpack('>i', Data)]
             self.signalList += [data[i: i + self.channelNum]
                                 for i in range(0, len(data), self.channelNum)]
             if (self.TimeOfsignal < 0):

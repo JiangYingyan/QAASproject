@@ -3,7 +3,9 @@ import wx
 
 from Graz import Graz, MIStimulator
 from nsDataServer import nsDataServer
+from neDataServer import neDataServer
 from OnlinensDataServer import OnlinensDataServer
+from OnlineneDataServer import OnlineneDataServer
 import pickle
 
 # 初始化配置窗体
@@ -251,7 +253,8 @@ class MainWindow(wx.Frame):
                                  wait_for_cue_duration=waitCue,
                                  display_cue_duration=dispCue,
                                  feedback_duration=feedback)
-        self.dataServer = nsDataServer(self)
+        #self.dataServer = nsDataServer(self)
+        self.dataServer = neDataServer(self)
         msg = "Graz Stimulator is Ready!\n" + "Total Time of the Session is: " + \
             str(self.stim.T)+"s\n"+"Start Now?"
         style = wx.OK | wx.CANCEL | wx.CENTRE
@@ -312,7 +315,8 @@ class MainWindow(wx.Frame):
                                  wait_for_cue_duration=waitCue,
                                  display_cue_duration=dispCue,
                                  feedback_duration=feedback)
-        self.dataServer = OnlinensDataServer(self)
+        #self.dataServer = OnlinensDataServer(self)
+        self.dataServer = OnlinenDataServer(self)
         msg = "Graz Stimulator is Ready!\n" + \
             "Total Time of the Session is: " + \
             str(self.stim.T)+"s\n"+"Start Now?"

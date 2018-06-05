@@ -82,8 +82,11 @@ def loadnpz(filepath, filter_low, filter_high):
 
 
 if __name__ == "__main__":
-    import scipy.io as sio
-    filter_low = 8
-    filter_high = 30
-    Data, label, Fs = loadnpz('D:\\Myfiles\\PythonProjects\\signal\\ZJJ\\0423\\onlineNSsignal_2018_04_23_15_43_37.npz', filter_low, filter_high)
-    sio.savemat('D:\\Myfiles\\PythonProjects\\signal\\ZJJ\\0423\\mat_data\\onlineNSsignal_2018_04_23_15_43_37.mat', {'data_x': Data, 'data_y': label})
+    import numpy as np
+
+   # import scipy.io as sio
+
+    #filter_low = 8
+    #filter_high = 30
+    #Data, label, Fs = loadnpz('E:\\MIproject\\TestSignal\\acquireNSsignal_2018_06_04_16_45_48.npz', filter_low, filter_high)
+    #sio.savemat('D:\\Myfiles\\PythonProjects\\signal\\ZJJ\\0423\\mat_data\\onlineNSsignal_2018_04_23_15_43_37.mat', {'data_x': Data, 'data_y': label})
