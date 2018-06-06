@@ -54,7 +54,7 @@ class OnlineneDataServer(DataServer):
                 Data = Data + a
                 total = total + len(a)
             data = [i[0]
-                    for i in struct.iter_unpack('<i', Data)]
+                    for i in struct.iter_unpack('>i', Data)]
             self.signalList += [data[i: i + self.channelNum]
                                 for i in range(0, len(data), self.channelNum)]
             if self.markList[len(self.markList) - 1][1] == 770 or self.markList[len(self.markList) - 1][1] == 769 or \

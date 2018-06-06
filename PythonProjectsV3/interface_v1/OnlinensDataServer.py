@@ -16,7 +16,7 @@ class OnlinensDataServer(DataServer):
         self.port = 9889
         self.NSocket = socket.socket()
         self.NSocket.settimeout(15)
-        self.predictList = np.zeros(3)  # 实时指令
+        self.predictList = np.zeros(4)  # 实时指令
         self.lastCommand = 0  # 记忆上一条指令
         self.signal = []
         self.Com = None
@@ -34,14 +34,10 @@ class OnlinensDataServer(DataServer):
             print("Data Server Connection Completed")
             self.NSocket.settimeout(None)
             self.connected = True
-        # --不连机械手注释1 exoskeleton--
-        comNum = 18
-        baudRate = 9600
-        try:
+        if self.mainMenuData['exoskeletonFeedback']:  # — 连机械手Step 1 --
+            comNum = 18
+            baudRate = 9600
             self.Com = self.ConnectToCOM(comNum, baudRate)
-        except Exception as e:
-            print(str(e))
-        # -------------------------------
         self.SendCommandToNS(3, 5)
         time.sleep(0.1)
         # get basic information
@@ -52,10 +48,7 @@ class OnlinensDataServer(DataServer):
         Code = int.from_bytes(self.BasicInfo[4:6], byteorder='big')
         req = int.from_bytes(self.BasicInfo[6:8], byteorder='big')
         size = int.from_bytes(self.BasicInfo[8:12], byteorder='big')
-        if(Code == 1 and
-           req == 3 and
-           size == 28 and
-           len(self.BasicInfo) == 40):
+        if(Code == 1 and req == 3 and size == 28 and len(self.BasicInfo) == 40):
             self.Bsize = int.from_bytes(
                 self.BasicInfo[12:16], byteorder='little')
             self.BEegChannelNum = int.from_bytes(
@@ -82,7 +75,6 @@ class OnlinensDataServer(DataServer):
         # input = open('D:\\python\\PythonCodes\\PythonProjectsV2\\signal\\PL\\TrainPL0426.pkl', 'rb')
         # self.classifier_model = pickle.load(input)
         # self.csp_ProjMatrix = pickle.load(input)
-
 
     def onDataRead(self):
         while(1):
@@ -111,13 +103,15 @@ class OnlinensDataServer(DataServer):
         if self.markList[-1][1] == 770 or self.markList[-1][1] == 769 or self.markList[-1][1] == 781:
             OnlineSignal = np.array(self.signalList[-500:])
             onlineS = OnlineSignal[:, 0:self.BEegChannelNum]
+            # onlineS = np.delete(onlineS, 6, 1)  # Cz 打通了 移除 = =
             predict = OnlineTest(onlineS, self.BSampleRate, 8, 30, self.csp_ProjMatrix,
                                     self.classifier_model)
 
             self.OnlineResult.append(int(predict))
-
-            self.SendEpochCommandToCom(self.Com, predict)  # 不连机械手注释2 ver2 exoskeleton
-
+            # — 连机械手Step 2 ver Epoch--
+            if self.markList[-1][1] == 769:
+                if self.mainMenuData['exoskeletonFeedback'] and self.mainMenuData['controlStrategyEpoch']:
+                    self.SendEpochCommandToCom(self.Com, predict)
         if len(self.OnlineResult) != 0 and self.markList[-1][1] == 800:
             self.Com.write('0'.encode())
             i = 20
@@ -131,17 +125,20 @@ class OnlinensDataServer(DataServer):
             # right = sum(self.OnlineResult[i:])
             # left = len(self.OnlineResult) - i - right
             print('————————————')
-
             if left < right:  # if(right > 1/3 *(right + left)):
-                if self.markList[len(self.markList) - 3][1] == 770:
+                if self.markList[-3][1] == 770:
                     self.rightcount = self.rightcount + 1
-                print('classification result; right |cue:' + str(self.markList[len(self.markList)-3][1]))
-                # SendTrialCommandToCom(self, com, 0) # 不连机械手注释2 ver1 exoskeleton
+                print('classification result; right |cue:' + str(self.markList[-3][1]))
+                # — 连机械手Step 2 ver Trial--
+                if self.mainMenuData['exoskeletonFeedback'] and self.mainMenuData['controlStrategyTrial']:
+                    self.SendTrialCommandToCom(self.Com, 0)
             else:
-                if self.markList[len(self.markList) - 3][1] == 769:
+                if self.markList[-3][1] == 769:
                     self.rightcount = self.rightcount + 1
-                print('classification result; left |cue:' + str(self.markList[len(self.markList)-3][1]))
-                # SendTrialCommandToCom(self, com, 1) # 不连机械手注释2 ver1 exoskeleton
+                print('classification result; left |cue:' + str(self.markList[-3][1]))
+                # — 连机械手Step 2 ver Trial--
+                if self.mainMenuData['exoskeletonFeedback'] and self.mainMenuData['controlStrategyTrial']:
+                    self.SendTrialCommandToCom(self.Com, 1)
             result_str = 'left count:' + str(left) + ', right count:' + str(right)
             print(result_str)
             print('rightcount:' + str(self.rightcount))
@@ -151,8 +148,9 @@ class OnlinensDataServer(DataServer):
         self.SendCommandToNS(3, 4)
         self.SendCommandToNS(2, 2)
         self.SendCommandToNS(1, 2)
-        self.Com.write('0'.encode())
-        self.Com.close()  # 不连机械手注释3 exoskeleton
+        if self.mainMenuData['exoskeletonFeedback']:  # — 连机械手Step 3 --
+            self.Com.write('0'.encode())
+            self.Com.close()
 
     def SendCommandToNS(self, ctrcode, reqnum):
         a = 'CTRL'
@@ -184,29 +182,28 @@ class OnlinensDataServer(DataServer):
         return COM
 
     def SendTrialCommandToCom(self, com, result):
-        com.write(str(result))
+        com.write(str(result).encode())
 
     def SendEpochCommandToCom(self, com, predict):
         self.predictList[:-1] = self.predictList[1:]
         self.predictList[-1] = predict
-        # 全1 且未输出过 动的指令
-        if sum(self.predictList) == len(self.predictList) and self.lastCommand != 0:
+        # 全1 且上一个输出不是 1 的指令
+        if sum(self.predictList) > len(self.predictList) - 2 and self.lastCommand != 0:
             self.lastCommand = 0
-            #self.lastCommand.encode('ascii')
-            # print("0___")
             com.write('0'.encode())
-        elif sum(self.predictList) == 0 and self.lastCommand != 1:
+        elif sum(self.predictList) < 2 and self.lastCommand != 1:
             self.lastCommand = 1
-            # print("1___")
-            #com.write(str(self.lastCommand))
             com.write('1'.encode())
 
     def loadTrainModel(self, pklPath):
         # input = open('D:\\python\\PythonCodes\\PythonProjectsV2\\signal\\PL\\TrainPL0426.pkl', 'rb')
         input = open(pklPath, 'rb')
-        # self.csp_ProjMatrix = pickle.load(input)
-        self.classifier_model = pickle.load(input)
         self.csp_ProjMatrix = pickle.load(input)
+        self.classifier_model = pickle.load(input)
+
+    def loadSettings(self, mainMenuData):
+        self.mainMenuData = mainMenuData
+
 
 
 if __name__ == "__main__":

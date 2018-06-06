@@ -16,11 +16,11 @@ StimEvent, EVT_STIM = wx.lib.newevent.NewEvent()  # 自定义事件
 class Graz(wx.Frame):
     #  刺激界面
     def __init__(self, parent=None, customFirstCuePath = '', customSecondCuePath = '', auditoryCue = False):
-        super(Graz, self).__init__(parent, title="Graz", size=(1280, 640))
+        super(Graz, self).__init__(parent, title="Graz", size=(1280, 720))
         self.SetWindowStyle(wx.DEFAULT_FRAME_STYLE & ~(
             wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
-        self.SetBackgroundColour(wx.BLACK)
-        #self.Centre()
+        self.SetBackgroundColour((209, 238, 238))
+        self.Centre()
         self.Bind(EVT_STIM, self.onStim)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.setStimulator()
@@ -31,8 +31,8 @@ class Graz(wx.Frame):
         self.centerPoint = wx.Point((self.dc.GetSize() / 2).Get())
         self.gifCtrl = wxadv.AnimationCtrl(self)
         self.threadStim = None
-        print("parent:", self.Parent)
-        print(self.Parent.grazFinish)
+        # print("parent:", self.Parent)
+        # print(self.Parent.grazFinish)
         rightArrow = [wx.Point(i) for i in
                      [(20, 50), (-80, 50), (-80, -50), (20, -50),
                       (20, -100), (120, 0), (20, 100)]]
@@ -45,44 +45,39 @@ class Graz(wx.Frame):
             'up': upArrow,
             'down': downArrow
         }
+        self.LeftSound = ''
+        self.RightSound = ''
+        if auditoryCue:
+            self.LeftSound = '..\\CueMaterial\\motorsound.wav'
+            self.RightSound = '..\\CueMaterial\\restsound.wav'
         self.onStimActions = {
-            'OVTK_GDF_Left': (self.drawArrow, 'left'),
-            'OVTK_GDF_Right': (self.drawArrow, 'right'),
-            'OVTK_GDF_Up': (self.drawArrow, 'up'),
-            'OVTK_GDF_Down': (self.drawArrow, 'down'),
+
+            'OVTK_GDF_Left': (self.drawArrow, 'left',self.LeftSound),
+            'OVTK_GDF_Right': (self.drawArrow, 'right',self.RightSound),
+            'OVTK_GDF_Up': (self.drawArrow, 'up', None),
+            'OVTK_GDF_Down': (self.drawArrow, 'down', None),
             'OVTK_GDF_Cross_On_Screen': (self.drawCross, None),
             'OVTK_GDF_Feedback_Continuous': (self.drawCross, None),
             'OVTK_GDF_End_Of_Trial': (self.clear, None),
             'OVTK_StimulationId_ExperimentStop': (self.displayText,
-                                                  '结束'),
+                                                  '结束', None),
             'OVTK_StimulationId_ExperimentStart': (self.displayText,
-                                                   '即将开始'),
+                                                   '即将开始', None),
             'OVTK_StimulationId_BaselineStart': (self.displayText,
-                                                 '请放松'),
+                                                 '请放松', None),
             'OVTK_StimulationId_BaselineStop': (self.displayText,
-                                                '')
+                                                '', None)
         }
         if customFirstCuePath != '':
-            self.onStimActions['OVTK_GDF_Left'] = (self.displayCue, customFirstCuePath)
+            self.onStimActions['OVTK_GDF_Left'] = (self.displayCue, customFirstCuePath, self.LeftSound)
         if customSecondCuePath != '':
-            self.onStimActions['OVTK_GDF_Right'] = (self.displayCue, customSecondCuePath)
-        if auditoryCue:
-            LeftSound = ''
-            RightSound = ''
-            self.onStimActions['OVTK_GDF_Left'] = (self.playSound, LeftSound)
-            self.onStimActions['OVTK_GDF_Left'] = (self.playSound, RightSound)
+            self.onStimActions['OVTK_GDF_Right'] = (self.displayCue, customSecondCuePath, self.RightSound)
 
-    def setFirstCue(self, path = None):
-        if path:
-            self.onStimActions['OVTK_GDF_Left'] = (self.displayCue, path)
-        else:
-            self.onStimActions['OVTK_GDF_Left'] = (self.drawArrow, 'left')
-
-    def setSecondCue(self, path = None):
-        if path:
-            self.onStimActions['OVTK_GDF_Right'] = (self.displayCue, path)
-        else:
-            self.onStimActions['OVTK_GDF_Right'] = (self.drawArrow, 'right')
+        # if auditoryCue:
+        #     self.LeftSound = 'E:\\GitHub\\QAASproject\\PythonProjectsV3\\CueMaterial\\1969.wav'
+        #     self.RightSound = 'E:\\GitHub\\QAASproject\\PythonProjectsV3\\CueMaterial\\1969.wav'
+            #self.onStimActions['OVTK_GDF_Left'] = (self.displaySound, LeftSound)
+            #self.onStimActions['OVTK_GDF_Right'] = (self.displaySound, RightSound)
 
     def clear(self):
         self.dc.Clear()
@@ -90,14 +85,14 @@ class Graz(wx.Frame):
         self.gifCtrl.Hide()
 
     def drawArrow(self, direction):
-        self.dc.SetPen(wx.Pen(wx.RED))
-        self.dc.SetBrush(wx.Brush(wx.RED))
+        self.dc.SetPen(wx.Pen((112,128,144)))
+        self.dc.SetBrush(wx.Brush((112,128,144)))
         self.dc.DrawPolygon([self.centerPoint + wx.Size(i.x, i.y) * self.radio
                              for i in self.arrow.get(direction, [])])
 
     def drawCross(self):
         self.clear()
-        self.dc.SetPen(wx.Pen(wx.GREEN))
+        self.dc.SetPen(wx.Pen((112,128,144)))
         w = 240 * self.radio
         h = 180 * self.radio
         self.dc.DrawLine(
@@ -109,23 +104,26 @@ class Graz(wx.Frame):
 
     def displayText(self, string=''):
         self.clear()
-        self.dc.SetTextForeground(wx.WHITE)
+        self.dc.SetTextForeground((112,128,144))
         self.dc.SetFont(wx.Font(wx.FontInfo(48).Bold().FaceName('SimHei')))
-        self.dc.DrawText(string, self.centerPoint-self.dc.GetTextExtent(string)/2)
+        self.dc.DrawText(string, self.centerPoint - self.dc.GetTextExtent(string) / 2)
 
     def displayCue(self, path=''):
-        # img = wx.Bitmap(path, wx.BITMAP_TYPE_BMP)
+        # img = wx.BitmapFromImage(wx.Image(path, wx.BITMAP_TYPE_ANY))
+        # self.dc.DrawBitmap(img, self.centerPoint - img.GetSize()/2)
         img = wx.Image(path)
-        print(img.GetType()==wx.BITMAP_TYPE_GIF)
+        # print(img.GetType() == wx.BITMAP_TYPE_GIF)
         if img.GetType() == wx.BITMAP_TYPE_GIF:
             self.displayGif(path)
         else:
             img = img.ConvertToBitmap()
-            self.dc.DrawBitmap(img, self.centerPoint - img.GetSize()/2)
+            self.dc.DrawBitmap(img, self.centerPoint - img.GetSize() / 2)
 
-    def playSound(self, path=''):
-        sound = wx.adv.Sound(path)
-        sound.Play()
+
+    def displaySound(self, path=''):
+        filename = path
+        self.sound = wx.adv.Sound(filename)
+        self.sound.Play(wx.adv.SOUND_ASYNC)
 
     def displayGif(self, path=''):
         self.gifCtrl.LoadFile(path)
@@ -165,8 +163,12 @@ class Graz(wx.Frame):
         if(action):
             if(action[1]):
                 action[0](action[1])
+                if (action[2]):
+                    if (action[2] != ''):
+                        self.displaySound(action[2])
             else:
                 action[0]()
+
 
     def onClose(self, evet):
         evet.Skip()
@@ -195,11 +197,11 @@ class Stimulator:
         self.tagging = False
         self.sche = sched.scheduler()
 
-    def addStim(self, stim, interval=0, during=0, priority =10):
+    def addStim(self, stim, interval=0, during=0, priority=10):
         self.sequence.append((self.T, stim, interval, during, priority))
         self.T += interval
 
-    def insertStim(self, stim, t=0, during=0, priority = 10):
+    def insertStim(self, stim, t=0, during=0, priority=10):
         self.sequence.append((self.T, stim, interval, during, priority))
         self.T = t
 
