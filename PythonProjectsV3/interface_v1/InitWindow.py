@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 import wx
-#<<<<<<< HEAD
 
 from Graz import Graz, MIStimulator
 from nsDataServer import nsDataServer
 from OnlinensDataServer import OnlinensDataServer
 import pickle
-#=======
+
 from settingWindow import settingCueWindow
 from acqOrOnlineWindow import acqAndTrainModelWindow, OnlineTestWindow
-#>>>>>>> origin/master
 
 # 初始化配置窗体
 class MainWindow(wx.Frame):
@@ -47,6 +45,7 @@ class MainWindow(wx.Frame):
         self.mainMenuData = {
             'visualFeedback': True,
             'exoskeletonFeedback': False,
+            'comNum': 18,
             'controlStrategyTrial': True,
             'controlStrategyEpoch': False,  # Trial和Epoch仅能有1个True
             'angleRange': 50,
@@ -81,13 +80,19 @@ class MainWindow(wx.Frame):
         self.settingCueBtn = wx.Button(panel, label="设置提示界面")
         gridSizer1.Add(self.settingCueBtn, 0, wx.ALL, 5)
 
-        gridSizer2 = wx.FlexGridSizer(cols=2, vgap=10, hgap=1)
+        gridSizer2 = wx.FlexGridSizer(cols=4, vgap=10, hgap=1)
 
         self.visualFeedback = wx.CheckBox(panel, -1, "视觉反馈")
         gridSizer2.Add(self.visualFeedback, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
         self.exoskeletonFeedback = wx.CheckBox(panel, -1, "外骨骼反馈")
         gridSizer2.Add(self.exoskeletonFeedback, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+
+        self.comNum = wx.SpinCtrl(panel, value='18', min=0, max=10000, size=(70, 27))
+        label = wx.StaticText(panel)
+        label.SetLabel("| 端口号：")
+        gridSizer2.Add(label, 0, wx.ALL | wx.ALIGN_CENTER, 5)
+        gridSizer2.Add(self.comNum, 0, wx.ALL, 5)
 
         # exoskeleton box 外骨骼
         sbox3 = wx.StaticBox(panel, -1, label=u'外骨骼设置')
@@ -146,10 +151,11 @@ class MainWindow(wx.Frame):
         panel.Center()
 
         self.Fit()
-#<<<<<<< HEAD
+
     def initData(self, mainMenuData):
         self.visualFeedback.SetValue(mainMenuData['visualFeedback'])
         self.exoskeletonFeedback.SetValue(mainMenuData['exoskeletonFeedback'])
+        self.comNum.SetValue(mainMenuData['comNum'])
         self.controlStrategyTrial.SetValue(mainMenuData['controlStrategyTrial'])
         self.controlStrategyEpoch.SetValue(mainMenuData['controlStrategyEpoch'])
         self.angleRange.SetValue(mainMenuData['angleRange'])
@@ -165,10 +171,11 @@ class MainWindow(wx.Frame):
 
     def OnNext(self, event):
         self.mainMenuData = {
-            'visualFeedback': self.visualFeedback.GetValue(),
-            'exoskeletonFeedback': self.exoskeletonFeedback.GetValue(),
-            'controlStrategyTrial': self.controlStrategyTrial.GetValue(),
-            'controlStrategyEpoch': self.controlStrategyEpoch.GetValue(),
+            'visualFeedback': self.visualFeedback.GetValue(),  # 视觉反馈
+            'exoskeletonFeedback': self.exoskeletonFeedback.GetValue(),  # 外骨骼反馈
+            'comNum': self.comNum.GetValue(),  # 端口号
+            'controlStrategyTrial': self.controlStrategyTrial.GetValue(),  # 按trial反馈
+            'controlStrategyEpoch': self.controlStrategyEpoch.GetValue(),  # 按epoch反馈
             'angleRange': self.angleRange.GetValue(),
             'velocity': self.velocity.GetValue()
         }
@@ -186,7 +193,6 @@ class MainWindow(wx.Frame):
             OnlineTest.setValue(self.CueSettingData, self.mainMenuData)
             OnlineTest.ShowModal()
             self.OnlineTestData = OnlineTest.getValue()
-#>>>>>>> origin/master
 
     def OnReset(self, event):
         self.initUI()

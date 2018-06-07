@@ -35,7 +35,7 @@ class OnlinensDataServer(DataServer):
             self.NSocket.settimeout(None)
             self.connected = True
         if self.mainMenuData['exoskeletonFeedback']:  # — 连机械手Step 1 --
-            comNum = 18
+            comNum = self.mainMenuData['comNum']
             baudRate = 9600
             self.Com = self.ConnectToCOM(comNum, baudRate)
         self.SendCommandToNS(3, 5)

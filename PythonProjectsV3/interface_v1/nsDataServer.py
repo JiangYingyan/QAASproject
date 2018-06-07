@@ -1,11 +1,11 @@
 import socket
 import struct
 import time
-
+import serial
 import numpy as np
 from pylsl import StreamInlet, resolve_stream
-
 from DataServer import DataServer
+
 
 class nsDataServer(DataServer):
     def __init__(self, parent):
@@ -29,6 +29,10 @@ class nsDataServer(DataServer):
             print("Data Server Connection Completed")
             self.NSocket.settimeout(None)
             self.connected = True
+        if self.mainMenuData['exoskeletonFeedback']:  # — 连机械手Step 1 --
+            comNum = self.mainMenuData['comNum']
+            baudRate = 9600
+            self.Com = self.ConnectToCOM(comNum, baudRate)
         self.SendCommandToNS(3, 5)
         time.sleep(0.1)
         # get basic information
@@ -87,10 +91,32 @@ class nsDataServer(DataServer):
         self.signalList += [data[i: i + self.channelNum]
                             for i in range(0, len(data), self.channelNum)]
 
+        if self.markList[-1][1] == 769 and self.mainMenuData['exoskeletonFeedback']:
+                self.SendEpochCommandToCom(self.Com, 1)
+        if (self.markList[-1][1] == 770 or self.markList[-1][1] == 800) \
+                and self.mainMenuData['exoskeletonFeedback']:
+                self.SendEpochCommandToCom(self.Com, 0)
     def onDisconnect(self):
         self.SendCommandToNS(3, 4)
         self.SendCommandToNS(2, 2)
         self.SendCommandToNS(1, 2)
+        if self.mainMenuData['exoskeletonFeedback']:  # — 连机械手Step 3 --
+            self.Com.write('0'.encode())
+            self.Com.close()
+
+    def ConnectToCOM(self, comNum, baudRate):
+        print('Connecting to COM')
+        com_name = 'COM' + str(comNum)
+        COM = None
+        try:
+            COM = serial.Serial(com_name, baudRate)
+            print('Connect to COM successfully')
+        except Exception as e:
+            print('Open serial failed. '+str(e))
+        return COM
+
+    def SendCommandToCom(self, com, result):
+        com.write(str(result).encode())
 
     def SendCommandToNS(self, ctrcode, reqnum):
         a = 'CTRL'
@@ -102,6 +128,9 @@ class nsDataServer(DataServer):
 
     def getSignal(self):
         return np.array(self.signal)
+
+    def loadSettings(self, mainMenuData):
+        self.mainMenuData = mainMenuData
 
     def saveData(self, path):
         self.TimeOfsignal = np.array([self.TimeOfsignal])
