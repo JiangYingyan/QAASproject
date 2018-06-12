@@ -37,19 +37,20 @@ class MainWindow(wx.Frame):
             'secondClassNum': 10,
             'baselineDuration': 5,
             'waitCueDuration': 2,
-            'dispCueDuration': 5,
-            'customFirstClass': '',
-            'customSecondClass': '',
-            'auditoryIsChecked': False
+            'dispCueDuration': 10,
+            'customFirstClass': '..\\CueMaterial\\lefthand.gif',  # 运动
+            'customSecondClass': '..\\CueMaterial\\restimg.jpg',  # 放松
+            'auditoryIsChecked': True
         }
         self.mainMenuData = {
             'visualFeedback': True,
             'exoskeletonFeedback': False,
-            'comNum': 18,
+            'comNum': 18,  # 端口号
             'controlStrategyTrial': True,
             'controlStrategyEpoch': False,  # Trial和Epoch仅能有1个True
-            'angleRange': 50,
-            'velocity': 10
+            'angleStart': 0,  # 初始角度
+            'angleRange': 60,  # 角度范围 最大79°
+            'velocity': 2
         }
         self.acqAndTrainModelData = {
             'accquDataPath': '',
@@ -108,18 +109,25 @@ class MainWindow(wx.Frame):
         gridSizer3.Add(self.controlStrategyTrial, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
         gridSizer3.Add(self.controlStrategyEpoch, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
-
         label = wx.StaticText(panel)
-        label.SetLabel("角度范围：")
+        label.SetLabel("初始角度：")
         gridSizer3.Add(label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
-        self.angleRange = wx.SpinCtrl(panel, value='90', min=0, max=160, size=(100, 27))  # 外骨骼角度范围
-        gridSizer3.Add(self.angleRange, 0, wx.ALL, 5)
-
+        self.angleStart = wx.SpinCtrl(panel, value='0', min=0, max=79, size=(100, 27))  # 外骨骼初始角度
+        gridSizer3.Add(self.angleStart, 0, wx.ALL, 5)
         label = wx.StaticText(panel)
         label.SetLabel("")
         gridSizer3.Add(label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
-        self.velocity = wx.SpinCtrl(panel, value='10', min=0, max=20, size=(100, 27))  # 外骨骼速度
+        label = wx.StaticText(panel)
+        label.SetLabel("角度范围：")
+        gridSizer3.Add(label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+        self.angleRange = wx.SpinCtrl(panel, value='60', min=0, max=79, size=(100, 27))  # 外骨骼角度范围
+        gridSizer3.Add(self.angleRange, 0, wx.ALL, 5)
+        label = wx.StaticText(panel)
+        label.SetLabel("(最大：79°-初始)")
+        gridSizer3.Add(label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+
+        self.velocity = wx.SpinCtrl(panel, value='2', min=0, max=20, size=(100, 27))  # 外骨骼速度
         label = wx.StaticText(panel)
         label.SetLabel("速度：")
         gridSizer3.Add(label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
@@ -158,6 +166,7 @@ class MainWindow(wx.Frame):
         self.comNum.SetValue(mainMenuData['comNum'])
         self.controlStrategyTrial.SetValue(mainMenuData['controlStrategyTrial'])
         self.controlStrategyEpoch.SetValue(mainMenuData['controlStrategyEpoch'])
+        self.angleStart.SetValue(mainMenuData['angleStart'])
         self.angleRange.SetValue(mainMenuData['angleRange'])
         self.velocity.SetValue(mainMenuData['velocity'])
 
@@ -176,6 +185,7 @@ class MainWindow(wx.Frame):
             'comNum': self.comNum.GetValue(),  # 端口号
             'controlStrategyTrial': self.controlStrategyTrial.GetValue(),  # 按trial反馈
             'controlStrategyEpoch': self.controlStrategyEpoch.GetValue(),  # 按epoch反馈
+            'angleStart': self.angleStart.GetValue(),
             'angleRange': self.angleRange.GetValue(),
             'velocity': self.velocity.GetValue()
         }

@@ -47,26 +47,23 @@ class Graz(wx.Frame):
         }
         self.LeftSound = ''
         self.RightSound = ''
+        self.StopSound = ''
         if auditoryCue:
-            self.LeftSound = '..\\CueMaterial\\motorsound.wav'
-            self.RightSound = '..\\CueMaterial\\restsound.wav'
+            self.LeftSound = '..\\CueMaterial\\movesound.wav'
+            self.RightSound = '..\\CueMaterial\\relaxsound.wav'
+            self.StopSound = '..\\CueMaterial\\stopsound.wav'
         self.onStimActions = {
-
-            'OVTK_GDF_Left': (self.drawArrow, 'left',self.LeftSound),
-            'OVTK_GDF_Right': (self.drawArrow, 'right',self.RightSound),
+            'OVTK_GDF_Left': (self.drawArrow, 'left', self.LeftSound),
+            'OVTK_GDF_Right': (self.drawArrow, 'right', self.RightSound),
             'OVTK_GDF_Up': (self.drawArrow, 'up', None),
             'OVTK_GDF_Down': (self.drawArrow, 'down', None),
-            'OVTK_GDF_Cross_On_Screen': (self.drawCross, None),
-            'OVTK_GDF_Feedback_Continuous': (self.drawCross, None),
-            'OVTK_GDF_End_Of_Trial': (self.clear, None),
-            'OVTK_StimulationId_ExperimentStop': (self.displayText,
-                                                  '结束', None),
-            'OVTK_StimulationId_ExperimentStart': (self.displayText,
-                                                   '即将开始', None),
-            'OVTK_StimulationId_BaselineStart': (self.displayText,
-                                                 '请放松', None),
-            'OVTK_StimulationId_BaselineStop': (self.displayText,
-                                                '', None)
+            'OVTK_GDF_Cross_On_Screen': (self.drawCross, None, None),
+            'OVTK_GDF_Feedback_Continuous': (self.drawCross, None, None),
+            'OVTK_GDF_End_Of_Trial': (self.clear, None, self.StopSound),
+            'OVTK_StimulationId_ExperimentStop': (self.displayText, '结束', None),
+            'OVTK_StimulationId_ExperimentStart': (self.displayText, '即将开始', None),
+            'OVTK_StimulationId_BaselineStart': (self.displayText, '请放松', None),
+            'OVTK_StimulationId_BaselineStop': (self.displayText, '', None)
         }
         if customFirstCuePath != '':
             self.onStimActions['OVTK_GDF_Left'] = (self.displayCue, customFirstCuePath, self.LeftSound)
@@ -85,8 +82,8 @@ class Graz(wx.Frame):
         self.gifCtrl.Hide()
 
     def drawArrow(self, direction):
-        self.dc.SetPen(wx.Pen((112,128,144)))
-        self.dc.SetBrush(wx.Brush((112,128,144)))
+        self.dc.SetPen(wx.Pen((112, 128, 144)))
+        self.dc.SetBrush(wx.Brush((112, 128, 144)))
         self.dc.DrawPolygon([self.centerPoint + wx.Size(i.x, i.y) * self.radio
                              for i in self.arrow.get(direction, [])])
 
@@ -104,7 +101,7 @@ class Graz(wx.Frame):
 
     def displayText(self, string=''):
         self.clear()
-        self.dc.SetTextForeground((112,128,144))
+        self.dc.SetTextForeground((112, 128, 144))
         self.dc.SetFont(wx.Font(wx.FontInfo(48).Bold().FaceName('SimHei')))
         self.dc.DrawText(string, self.centerPoint - self.dc.GetTextExtent(string) / 2)
 
@@ -149,7 +146,7 @@ class Graz(wx.Frame):
             self.Parent.grazFinish()
             self.destroyStimulator()
             return
-        # print(evt.stim)
+        print(evt.stim)
         if(self.Parent.dataServer):
             code = OpenViBE_stimulation.get(evt.stim, -1)
             if(code != -1):
@@ -160,14 +157,14 @@ class Graz(wx.Frame):
                 }
                 self.Parent.dataServer.onStim(sitm)
         action = self.onStimActions.get(evt.stim, None)
-        if(action):
-            if(action[1]):
+        if action:
+            if action[1]:
                 action[0](action[1])
-                if (action[2]):
-                    if (action[2] != ''):
-                        self.displaySound(action[2])
             else:
                 action[0]()
+            if action[2] and action[2] is not '':
+                self.displaySound(action[2])
+
 
 
     def onClose(self, evet):
@@ -245,10 +242,8 @@ def MIStimulator(parent,
                  baseline_duration=1,
                  wait_for_cue_duration=1,
                  display_cue_duration=1,
-                 feedback_duration=1
                  ):
     s = Stimulator(parent)
-
     tasks = []
     tasks += [first_class] * number_of_first_class
     tasks += [second_class] * number_of_second_class
@@ -262,7 +257,7 @@ def MIStimulator(parent,
         s.addStim('OVTK_GDF_Start_Of_Trial', 0)
         s.addStim('OVTK_GDF_Cross_On_Screen', wait_for_cue_duration)
         s.addStim(task, display_cue_duration)
-        s.addStim('OVTK_GDF_Feedback_Continuous', feedback_duration, priority=5)
+        # s.addStim('OVTK_GDF_Feedback_Continuous', feedback_duration, priority=5)
         s.addStim('OVTK_GDF_End_Of_Trial', 2)
     s.addStim('OVTK_GDF_End_Of_Session', 5)
     s.addStim('OVTK_StimulationId_Train', 1)

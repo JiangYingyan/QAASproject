@@ -33,6 +33,13 @@ class nsDataServer(DataServer):
             comNum = self.mainMenuData['comNum']
             baudRate = 9600
             self.Com = self.ConnectToCOM(comNum, baudRate)
+            # 配置角度范围、速度
+            angleStart = self.mainMenuData['angleStart']
+            self.angleStart = (1600 / 4096 + angleStart) / 360 * 4096  # 初始位置
+            angleRange = self.mainMenuData['angleRange']
+            self.angleRange = (1600 / 4096 + angleRange) / 360 * 4096  # 范围
+            self.angleEnd = self.angleStart + self.angleRange  # 结束位置
+            self.velocity = self.mainMenuData['velocity']
         self.SendCommandToNS(3, 5)
         time.sleep(0.1)
         # get basic information
@@ -92,10 +99,10 @@ class nsDataServer(DataServer):
                             for i in range(0, len(data), self.channelNum)]
 
         if self.markList[-1][1] == 769 and self.mainMenuData['exoskeletonFeedback']:
-                self.SendEpochCommandToCom(self.Com, 1)
+                self.SendCommandToCom(self.Com, 1)
         if (self.markList[-1][1] == 770 or self.markList[-1][1] == 800) \
                 and self.mainMenuData['exoskeletonFeedback']:
-                self.SendEpochCommandToCom(self.Com, 0)
+                self.SendCommandToCom(self.Com, 0)
     def onDisconnect(self):
         self.SendCommandToNS(3, 4)
         self.SendCommandToNS(2, 2)

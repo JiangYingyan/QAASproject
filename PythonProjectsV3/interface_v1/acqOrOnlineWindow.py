@@ -93,7 +93,7 @@ class acqAndTrainModelWindow(wx.Dialog):
                                  baseline_duration=baseline,
                                  wait_for_cue_duration=waitCue,
                                  display_cue_duration=dispCue,
-                                 feedback_duration=0)
+                                 )
         #self.dataServer = nsDataServer(self)
         self.dataServer = neDataServer(self)
         msg = "总时长: " + str(self.stim.T)+"秒\n"+"是否开始任务?"

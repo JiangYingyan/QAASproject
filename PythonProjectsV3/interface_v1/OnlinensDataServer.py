@@ -38,6 +38,13 @@ class OnlinensDataServer(DataServer):
             comNum = self.mainMenuData['comNum']
             baudRate = 9600
             self.Com = self.ConnectToCOM(comNum, baudRate)
+            # 配置角度范围、速度
+            angleStart = self.mainMenuData['angleStart']
+            self.angleStart = (1600 / 4096 + angleStart) / 360 * 4096  # 初始位置
+            angleRange = self.mainMenuData['angleRange']
+            self.angleRange = (1600 / 4096 + angleRange) / 360 * 4096  # 范围
+            self.angleEnd = self.angleStart + self.angleRange  # 结束位置
+            self.velocity = self.mainMenuData['velocity']
         self.SendCommandToNS(3, 5)
         time.sleep(0.1)
         # get basic information
