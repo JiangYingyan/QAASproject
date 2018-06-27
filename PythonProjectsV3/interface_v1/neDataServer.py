@@ -1,7 +1,7 @@
 import socket
 import struct
 import time
-
+import serial
 import numpy as np
 from pylsl import StreamInlet, resolve_stream
 from DataServer import DataServer
@@ -33,6 +33,19 @@ class neDataServer(DataServer):
             print("Data Server Connection Completed")
             self.NSocket.settimeout(None)
             self.connected = True
+        if self.parent.mainMenuData['exoskeletonFeedback']:  # — 连机械手Step 1 --
+            comNum = self.parent.mainMenuData['comNum']
+            baudRate = 9600
+            self.Com = self.ConnectToCOM(comNum, baudRate)
+            # 配置角度范围、速度
+            angleStart = self.parent.mainMenuData['angleStart']
+            self.angleStart = int(1600 + angleStart /360 * 4096)  # 初始位置
+            angleRange = self.parent.mainMenuData['angleRange']
+            self.angleRange = int(angleRange / 360 * 4096)  # 范围
+            self.angleEnd = self.angleStart + self.angleRange  # 结束位置
+            self.velocity = self.parent.mainMenuData['velocity']
+            self.SendHeadCommandToCom(self.Com, self.velocity, self.angleStart, self.angleEnd)
+            self.Handmove = 0
 
     def onDataRead(self):
         if(self.connected == True):
@@ -51,8 +64,34 @@ class neDataServer(DataServer):
                 # print(time.time())
                 print(self.TimeOfsignal)
 
+            if self.markList[-1][1] == 769 and self.parent.mainMenuData['exoskeletonFeedback'] and self.Handmove == 0:
+                self.Com.write('1'.encode())
+                print('handmove')
+                self.Handmove = 1
+            if (self.markList[-1][1] == 770 or self.markList[-1][1] == 800) \
+                    and self.parent.mainMenuData['exoskeletonFeedback'] and self.Handmove == 1:
+                self.Com.write('0'.encode())
+                print('handstop')
+                self.Handmove = 0
 
 
+    def ConnectToCOM(self, comNum, baudRate):
+        print('Connecting to COM')
+        com_name = 'COM' + str(comNum)
+        COM = None
+        try:
+            COM = serial.Serial(com_name, baudRate)
+            print('Connect to COM successfully')
+        except Exception as e:
+            print('Open serial failed. '+str(e))
+        return COM
+
+    def SendHeadCommandToCom(self, com, speed, startangle, endangle):
+        Command = 'C' + str(speed) + 'A' + str(startangle) + 'B' + str(endangle)
+        com.write(Command.encode())
+        print(Command)
+       # time.sleep(0.5)
+        #com.write('1'.encode())
     def onDisconnect(self):
         self.NSocket.close()
 

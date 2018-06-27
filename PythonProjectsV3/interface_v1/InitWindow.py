@@ -35,22 +35,22 @@ class MainWindow(wx.Frame):
         self.CueSettingData = {
             'firstClassNum': 10,
             'secondClassNum': 10,
-            'baselineDuration': 5,
+            'baselineDuration': 10,
             'waitCueDuration': 2,
-            'dispCueDuration': 10,
+            'dispCueDuration': 8,
             'customFirstClass': '..\\CueMaterial\\lefthand.gif',  # 运动
-            'customSecondClass': '..\\CueMaterial\\restimg.jpg',  # 放松
+            'customSecondClass': '..\\CueMaterial\\restimg.png',  # 放松
             'auditoryIsChecked': True
         }
         self.mainMenuData = {
             'visualFeedback': True,
-            'exoskeletonFeedback': False,
-            'comNum': 18,  # 端口号
-            'controlStrategyTrial': True,
-            'controlStrategyEpoch': False,  # Trial和Epoch仅能有1个True
+            'exoskeletonFeedback': True,
+            'comNum': 17,  # 端口号
+            'controlStrategyTrial': False,
+            'controlStrategyEpoch': True,  # Trial和Epoch仅能有1个True
             'angleStart': 0,  # 初始角度
             'angleRange': 60,  # 角度范围 最大79°
-            'velocity': 2
+            'velocity': 30
         }
         self.acqAndTrainModelData = {
             'accquDataPath': '',
@@ -89,7 +89,7 @@ class MainWindow(wx.Frame):
         self.exoskeletonFeedback = wx.CheckBox(panel, -1, "外骨骼反馈")
         gridSizer2.Add(self.exoskeletonFeedback, 0, wx.ALL | wx.ALIGN_CENTER, 5)
 
-        self.comNum = wx.SpinCtrl(panel, value='18', min=0, max=10000, size=(70, 27))
+        self.comNum = wx.SpinCtrl(panel, value='17', min=0, max=10000, size=(70, 27))
         label = wx.StaticText(panel)
         label.SetLabel("| 端口号：")
         gridSizer2.Add(label, 0, wx.ALL | wx.ALIGN_CENTER, 5)
@@ -127,12 +127,13 @@ class MainWindow(wx.Frame):
         label.SetLabel("(最大：79°-初始)")
         gridSizer3.Add(label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
 
-        self.velocity = wx.SpinCtrl(panel, value='2', min=0, max=20, size=(100, 27))  # 外骨骼速度
+        self.velocity = wx.SpinCtrl(panel, value='30', min=10, max=80, size=(100, 27))  # 外骨骼速度
         label = wx.StaticText(panel)
         label.SetLabel("速度：")
         gridSizer3.Add(label, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
         gridSizer3.Add(self.velocity, 0, wx.ALL, 5)
         self.sbsizer3.Add(gridSizer3, proportion=0, flag=wx.ALL, border=5)
+
 
         gridSizer4 = wx.FlexGridSizer(cols=3, vgap=10, hgap=1)
         label = wx.StaticText(panel)
@@ -157,7 +158,7 @@ class MainWindow(wx.Frame):
 
         panel.SetSizerAndFit(gridSizer)
         panel.Center()
-
+        self.initData(self.mainMenuData)
         self.Fit()
 
     def initData(self, mainMenuData):

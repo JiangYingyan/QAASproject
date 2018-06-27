@@ -7,7 +7,7 @@ import numpy as np
 from Online import OnlineTest
 from DataServer import DataServer
 from StimulationsCodes import *
-import serial
+from Exoskeleton import Exoskeleton
 
 class OnlinensDataServer(DataServer):
     def __init__(self, parent):
@@ -34,17 +34,19 @@ class OnlinensDataServer(DataServer):
             print("Data Server Connection Completed")
             self.NSocket.settimeout(None)
             self.connected = True
-        if self.mainMenuData['exoskeletonFeedback']:  # — 连机械手Step 1 --
-            comNum = self.mainMenuData['comNum']
+        if self.parent.mainMenuData['exoskeletonFeedback']:  # — 连机械手Step 1 --
+            comNum = self.parent.mainMenuData['comNum']
             baudRate = 9600
-            self.Com = self.ConnectToCOM(comNum, baudRate)
+            self.Exoskeleton = Exoskeleton()
+            self.Exoskeleton.LinkToExoskleton(comNum, baudRate)
             # 配置角度范围、速度
-            angleStart = self.mainMenuData['angleStart']
-            self.angleStart = (1600 / 4096 + angleStart) / 360 * 4096  # 初始位置
-            angleRange = self.mainMenuData['angleRange']
-            self.angleRange = (1600 / 4096 + angleRange) / 360 * 4096  # 范围
+            angleStart = self.parent.mainMenuData['angleStart']
+            self.angleStart = int(1600 + angleStart / 360 * 4096)  # 初始位置
+            angleRange = self.parent.mainMenuData['angleRange']
+            self.angleRange = int(angleRange / 360 * 4096)  # 范围
             self.angleEnd = self.angleStart + self.angleRange  # 结束位置
-            self.velocity = self.mainMenuData['velocity']
+            self.velocity = self.parent.mainMenuData['velocity']
+            self.Exoskeleton.SendHeadCommandToCom(self.velocity, self.angleStart, self.angleEnd)
         self.SendCommandToNS(3, 5)
         time.sleep(0.1)
         # get basic information
@@ -79,9 +81,6 @@ class OnlinensDataServer(DataServer):
 
         self.SendCommandToNS(2, 1)
         self.SendCommandToNS(3, 3)
-        # input = open('D:\\python\\PythonCodes\\PythonProjectsV2\\signal\\PL\\TrainPL0426.pkl', 'rb')
-        # self.classifier_model = pickle.load(input)
-        # self.csp_ProjMatrix = pickle.load(input)
 
     def onDataRead(self):
         while(1):
@@ -110,7 +109,7 @@ class OnlinensDataServer(DataServer):
         if self.markList[-1][1] == 770 or self.markList[-1][1] == 769 or self.markList[-1][1] == 781:
             OnlineSignal = np.array(self.signalList[-500:])
             onlineS = OnlineSignal[:, 0:self.BEegChannelNum]
-            # onlineS = np.delete(onlineS, 6, 1)  # Cz 打通了 移除 = =
+
             predict = OnlineTest(onlineS, self.BSampleRate, 8, 30, self.csp_ProjMatrix,
                                     self.classifier_model)
 
@@ -118,9 +117,16 @@ class OnlinensDataServer(DataServer):
             # — 连机械手Step 2 ver Epoch--
             if self.markList[-1][1] == 769:
                 if self.mainMenuData['exoskeletonFeedback'] and self.mainMenuData['controlStrategyEpoch']:
-                    self.SendEpochCommandToCom(self.Com, predict)
+                    if(predict == 0):
+                        self.Exoskeleton.StrategyEpoch('move')
+                    elif(predict == 1):
+                        self.Exoskeleton.StrategyEpoch('rest')
+
+
         if len(self.OnlineResult) != 0 and self.markList[-1][1] == 800:
-            self.Com.write('0'.encode())
+            if self.Exoskeleton.CommandNumber:
+                self.Exoskeleton.LastCommand = 'rest'
+                self.Exoskeleton.ExoskeletonStop()
             i = 20
             left = right = 0
             while(i < len(self.OnlineResult)):
@@ -129,8 +135,7 @@ class OnlinensDataServer(DataServer):
                 elif(self.OnlineResult[i] == 1):
                     right = right + 1
                 i = i + 1
-            # right = sum(self.OnlineResult[i:])
-            # left = len(self.OnlineResult) - i - right
+
             print('————————————')
             if left < right:  # if(right > 1/3 *(right + left)):
                 if self.markList[-3][1] == 770:
@@ -138,14 +143,14 @@ class OnlinensDataServer(DataServer):
                 print('classification result; right |cue:' + str(self.markList[-3][1]))
                 # — 连机械手Step 2 ver Trial--
                 if self.mainMenuData['exoskeletonFeedback'] and self.mainMenuData['controlStrategyTrial']:
-                    self.SendTrialCommandToCom(self.Com, 0)
+                    self.Exoskeleton.StrategyTiral('rest')
             else:
                 if self.markList[-3][1] == 769:
                     self.rightcount = self.rightcount + 1
                 print('classification result; left |cue:' + str(self.markList[-3][1]))
                 # — 连机械手Step 2 ver Trial--
                 if self.mainMenuData['exoskeletonFeedback'] and self.mainMenuData['controlStrategyTrial']:
-                    self.SendTrialCommandToCom(self.Com, 1)
+                    self.Exoskeleton.StrategyTiral('move')
             result_str = 'left count:' + str(left) + ', right count:' + str(right)
             print(result_str)
             print('rightcount:' + str(self.rightcount))
@@ -155,9 +160,8 @@ class OnlinensDataServer(DataServer):
         self.SendCommandToNS(3, 4)
         self.SendCommandToNS(2, 2)
         self.SendCommandToNS(1, 2)
-        if self.mainMenuData['exoskeletonFeedback']:  # — 连机械手Step 3 --
-            self.Com.write('0'.encode())
-            self.Com.close()
+        if self.parent.mainMenuData['exoskeletonFeedback']:  # — 连机械手Step 3 --
+            self.Exoskeleton.Disconnected()
 
     def SendCommandToNS(self, ctrcode, reqnum):
         a = 'CTRL'
@@ -177,33 +181,8 @@ class OnlinensDataServer(DataServer):
         np.savez(time.strftime(path + "\\onlineNSsignal_%Y_%m_%d_%H_%M_%S"),
                  signal=self.signal, mark=self.mark, timestamp=self.timestamp, firstsignal=self.TimeOfsignal)
 
-    def ConnectToCOM(self, comNum, baudRate):
-        print('Connecting to COM')
-        com_name = 'COM' + str(comNum)
-        COM = None
-        try:
-            COM = serial.Serial(com_name, baudRate)
-            print('Connect to COM successfully')
-        except Exception as e:
-            print('Open serial failed. '+str(e))
-        return COM
-
-    def SendTrialCommandToCom(self, com, result):
-        com.write(str(result).encode())
-
-    def SendEpochCommandToCom(self, com, predict):
-        self.predictList[:-1] = self.predictList[1:]
-        self.predictList[-1] = predict
-        # 全1 且上一个输出不是 1 的指令
-        if sum(self.predictList) > len(self.predictList) - 2 and self.lastCommand != 0:
-            self.lastCommand = 0
-            com.write('0'.encode())
-        elif sum(self.predictList) < 2 and self.lastCommand != 1:
-            self.lastCommand = 1
-            com.write('1'.encode())
 
     def loadTrainModel(self, pklPath):
-        # input = open('D:\\python\\PythonCodes\\PythonProjectsV2\\signal\\PL\\TrainPL0426.pkl', 'rb')
         input = open(pklPath, 'rb')
         self.csp_ProjMatrix = pickle.load(input)
         self.classifier_model = pickle.load(input)
@@ -218,16 +197,21 @@ if __name__ == "__main__":
     import random
     import time
     dataServer = OnlinensDataServer(DataServer)
-    comNum = 18
+    comNum = 17
     baudRate = 9600
     predictList = np.zeros(3)
     Com = dataServer.ConnectToCOM(comNum, baudRate)
-    for i in range(500):
+    #Com.write('1'.encode())
+    time.sleep(2)
+    dataServer.SendHeadCommandToCom(Com,20,1800,2000)
+    time.sleep(10)
+
+    for i in range(50):
         #Com.write('1'.encode())
         predict = random.randint(0, 1)
         print(str(predict))
         dataServer.SendEpochCommandToCom(Com, predict)
-        time.sleep(0.04)
+        time.sleep(1)
     Com.write('0'.encode())
     Com.close()
 

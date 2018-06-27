@@ -94,8 +94,8 @@ class acqAndTrainModelWindow(wx.Dialog):
                                  wait_for_cue_duration=waitCue,
                                  display_cue_duration=dispCue,
                                  )
-        #self.dataServer = nsDataServer(self)
-        self.dataServer = neDataServer(self)
+        self.dataServer = nsDataServer(self)
+        #self.dataServer = neDataServer(self)
         msg = "总时长: " + str(self.stim.T)+"秒\n"+"是否开始任务?"
         style = wx.OK | wx.CANCEL | wx.CENTRE
         msgbox = wx.MessageDialog(self, msg, "校准任务开始", style)
@@ -127,8 +127,9 @@ class acqAndTrainModelWindow(wx.Dialog):
         csp_ProjMatrix, classifier_model = TrainModel(train_x, train_y, classifier_type, m)
         TrainModelPath = time.strftime(TrainModelPath + "\\TrainModel_%Y_%m_%d_%H_%M_%S.pkl")
         f1 = open(TrainModelPath, 'wb')
-        pickle.dump(classifier_model, f1)
+
         pickle.dump(csp_ProjMatrix, f1)
+        pickle.dump(classifier_model, f1)
         f1.close()
         self.statusLabel.SetLabel('模型训练完成。')
 
@@ -226,9 +227,10 @@ class OnlineTestWindow(wx.Dialog):
                                  number_of_second_class=secondClassNum,
                                  baseline_duration=baseline,
                                  wait_for_cue_duration=waitCue,
-                                 display_cue_duration=dispCue,
-                                 feedback_duration=0)
+                                 display_cue_duration=dispCue)
+                                 #feedback_duration=0
         self.dataServer = OnlinensDataServer(self)
+        #self.dataServer = OnlineneDataServer(self)
         msg = "总时长: " + str(self.stim.T) + "秒\n" + "是否开始任务?"
         style = wx.OK | wx.CANCEL | wx.CENTRE
         msgbox = wx.MessageDialog(self, msg, "训练任务开始", style)
