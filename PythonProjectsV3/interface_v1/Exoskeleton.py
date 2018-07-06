@@ -4,9 +4,7 @@
 import serial
 class Exoskeleton:
     def __int__(self):
-        print('link to exoskeleton')
-        self.EpochCommand = ['rest', 'rest', 'rest']
-        self.LastCommand = 'rest'
+
         self.CommandNumber = 0
     #连接串口，输入串口号和波特率
     def LinkToExoskleton(self, comNum, baudRate):
@@ -19,9 +17,7 @@ class Exoskeleton:
         except Exception as e:
             print('Open serial failed.' + str(e))
         print('link to exoskeleton')
-        self.EpochCommand = ['rest', 'rest', 'rest']
-        self.LastCommand = 'rest'
-        self.CommandNumber = 0
+        self.CommandNumber = None
 
     #初始化 输入外骨骼的运动速度，运动起始角度和结束角度
     def SendHeadCommandToCom(self, speed, startangle, endangle):
@@ -44,8 +40,13 @@ class Exoskeleton:
             self.ExoskeletonStop()
 #按每个epoch执行命令
     def StrategyEpoch(self,command):
+        if (not self.CommandNumber):
+            self.LastCommand = 'rest'
+            self.CommandNumber = 0
+            self.EpochCommand = ['rest', 'rest', 'rest']
+
         self.EpochCommand[self.CommandNumber % len(self.EpochCommand)] = command
-        print(self.EpochCommand)
+        #print(self.EpochCommand)
         self.CommandNumber = self.CommandNumber + 1
         movenumber = self.EpochCommand.count('move')
         restnumber = self.EpochCommand.count('rest')
